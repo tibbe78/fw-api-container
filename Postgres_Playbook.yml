@@ -21,9 +21,9 @@
     docker_image:
       build: 
         path: ./postgres
-        pull: no
+        pull: yes
       source: build
-      force_source: no
+      force_source: yes
       state: present
       name: fast_api_db_img
 
@@ -34,6 +34,8 @@
       purge_networks: yes
       networks:
         - name: db_net
+          aliases:
+          - postgres
       volumes:
         - "db_vol:/var/lib/postgresql/data"
       env:

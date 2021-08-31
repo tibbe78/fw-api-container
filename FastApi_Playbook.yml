@@ -33,6 +33,10 @@
       purge_networks: no
       networks:
         - name: db_net
+          aliases:
+          - fastapi
+          links:
+          - postgres
       volumes:
         - "fastapi_vol:/app"
       ports:
