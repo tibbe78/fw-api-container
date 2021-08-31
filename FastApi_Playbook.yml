@@ -1,0 +1,52 @@
+---
+- hosts: dockerhost
+  become: false
+  gather_facts: false
+  vars_files:
+  - vault_common.yml
+  vars:
+    become_pass: "{{ sudo_password }}"
+
+  tasks:
+  - name: Create a db network in Docker
+    docker_network:
+      name: db_net
+
+  - name: Create a fastapi Volume in Docker
+    docker_volume:
+      name: fastapi_vol
+
+  - name: Build Fast-API image for Docker
+    docker_image:
+      build: 
+        path: ./fastapi
+        pull: yes
+      source: build
+      force_source: yes
+      state: present
+      name: fast_api_img
+
+  - name: Create the Docker Container from the image
+    docker_container:
+      name: fast_api_01
+      image: fast_api_img
+      purge_networks: no
+      networks:
+        - name: db_net
+      volumes:
+        - "fastapi_vol:/app"
+      ports:
+        # Publish container port 80 as host port 8080
+        - "8080:80"
+
+- hosts: fastapi
+  become: no
+  gather_facts: yes
+  tasks:
+    - name: ping the new docker containers
+      ping:
+
+    - name: Print the gateway for each host when defined
+      debug:
+        msg: System {{ inventory_hostname }} has gateway {{ ansible_python_version }}
+      when: ansible_python_version is defined
