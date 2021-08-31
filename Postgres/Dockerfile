@@ -1,0 +1,9 @@
+FROM postgres:latest
+ 
+ENV POSTGRES_PASSWORD=test1234test
+ENV POSTGRES_DB=FAST_API_DB
+ENV POSTGRES_USER=FASTAPI
+
+EXPOSE 5432
+
+ADD ./CreateDB.sql /docker-entrypoint-initdb.d/

@@ -1,0 +1,49 @@
+
+# Ansible
+docker volume create ansible
+docker build -t ansible .
+docker run --name ansible -it -v ansible:/var/ansible ansible
+
+# Jenkins
+docker pull jenkins/jenkins:lts-jdk11
+docker run -d --name jenkins -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts-jdk11
+
+# Volumes
+docker volume create my-vol
+docker volume inspect my-vol
+docker volume rm my-vol
+
+# Fast-API
+docker volume create fast-api
+docker build -t fastapi .
+docker run -d --name fastapi -p 8081:80 -v fast-api:/data fastapi
+
+# PostGres DB
+docker volume create postgres_data
+docker network create postgres_net
+docker build -t dev_postgres .
+docker run -d --name dev_postgres --network postgres_net -v postgres_data:/var/lib/postgresql/data dev_postgres
+
+# Remove PostGres DB
+docker stop dev_postgres
+docker rm dev_postgres
+docker volume rm postgres_data
+
+docker volume create postgres_data
+docker build -t dev_postgres .
+docker run -d --name dev_postgres --network postgres_net -v postgres_data:/var/lib/postgresql/data dev_postgres
+
+#Connect postgres
+docker exec -it dev_postgres bash
+psql -U postgres -d postgres -W test1234test
+
+#Other
+docker run -it --rm --network postgres_net -h dev_postgres -U dev_postgres
+docker run --name dev_postgres -e POSTGRES_PASSWORD_FILE=/run/secrets/postgres-passwd -d dev_postgres
+
+ docker run -d \
+    --name some-postgres \
+    -e POSTGRES_PASSWORD=mysecretpassword \
+    -e PGDATA=/var/lib/postgresql/data/pgdata \
+    -v /custom/mount:/var/lib/postgresql/data \
+    postgres
