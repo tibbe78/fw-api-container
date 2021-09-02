@@ -41,7 +41,7 @@
         - "fastapi_vol:/app"
       ports:
         # Publish container port 80 as host port 8080
-        - "8080:80"
+        - "8081:80"
 
 - hosts: fastapi
   become: no

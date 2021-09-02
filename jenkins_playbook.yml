@@ -1,0 +1,47 @@
+---
+- hosts: dockerhost
+  become: false
+  gather_facts: false
+  vars:
+    hostname: "jenkins"
+
+  tasks:
+  - name: "Create a {{ hostname }} Volume in Docker"
+    community.docker.docker_volume:
+      name: "{{ hostname }}_vol"
+
+  - name: "Build {{ hostname }} image for Docker"
+    community.docker.docker_image:
+      build: 
+        path: "./{{ hostname }}"
+        pull: yes
+      source: build
+      force_source: yes
+      state: present
+      name: "{{ hostname }}_img"
+
+  - name: "Create the {{ hostname }} Docker Container from the image"
+    community.docker.docker_container:
+      name: "{{ hostname }}_01"
+      image: "{{ hostname }}_img"
+      purge_networks: no
+      volumes:
+        - "{{ hostname }}_vol:/var/jenkins_home"
+      ports:
+        # Publish container port 80 as host port 8080
+        - "8080:8080"
+        - "50000:50000"
+
+- hosts: jenkins
+  become: no
+  gather_facts: yes
+  vars:
+    hostname: "jenkins"
+  tasks:
+    - name: "ping the new {{ hostname }} docker containers"
+      ping:
+
+    - name: "Print the gateway for each host when defined"
+      debug:
+        msg: "System {{ inventory_hostname }} has gateway {{ ansible_python_version }}"
+      when: ansible_python_version is defined
